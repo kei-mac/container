@@ -1,0 +1,65 @@
+###############################################################################################
+#   XXXXX開発環境
+#   VSCode Serverのコンテナの中には、TomcatとJDKとNode.jsの構築をしています。
+#   また、ソースコードで管理したいソースのみをボリュームしています。
+#   Postgres SQLの中には、ローカルのフォルダにあるデータをボリュームしています。
+#   作成者：来田　圭汰朗
+###############################################################################################
+
+# コンテナ構築
+services:
+  code-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        USER_NAME: ${USER_NAME}
+        USER_GROUP_NAME: ${USER_GROUP_NAME}
+        USER_UID: ${USER_UID}
+        USER_GID: ${USER_GID}
+        JAVA_VERSION: ${JAVA_VERSION}
+        GRADLE_VERSION: ${GRADLE_VERSION}
+        TOMCAT_VERSION: ${TOMCAT_VERSION}
+    # TomcatとJDKとNode.jsを構築済みのイメージファイル読み込み
+    container_name: ${CONTAINER_NAME_CODE_SERVER}
+    env_file: 
+      - .env
+    environment:
+      PASSWORD: ${CODE_SERVER_PASSWORD}
+    volumes:
+      - ${VOLUME_CODE_SERVER_PROJECT_HOST}:${VOLUME_CODE_SERVER_PROJECT_CONTAINER}
+    ports:
+      - "${CODE_SERVER_PROT_HOST}:${CODE_SERVER_PROT_CONTAINER}"
+    networks:
+      my_custom_network:
+        ipv4_address: ${CODE_SERVER_NET_IP}
+
+  postgres:
+    # XXXを構築するのに必要なデータをリストアしている状態のイメージファイルを構築
+    image: ${IMAGE_NAME_DATA_BASE}:${IMAGE_TAG_NAME_DATA_BASE}
+    container_name: ${CONTAINER_NAME_DATA_BASE}
+    env_file: 
+      - .env
+    environment:
+      POSTGRES_USER: ${DATA_BASE_USER_NAME_ROOT}
+      POSTGRES_PASSWORD: ${DATA_BASE_PASSWORD_ROOT}
+      POSTGRES_DB: ${DATA_BASE_NAME_ROOT}
+    ports:
+      - "${DATA_BASE_PORT_HOST}:${DATA_BASE_PORT_ROOT}"
+    volumes:
+      - ${VOLUME_DATA_BASE_PROJECT_HOST}:${VOLUME_DATA_BASE_PROJECT_CONTAINER}
+    networks:
+      my_custom_network:
+        ipv4_address: ${DATA_BASE_NET_IP}
+
+networks:
+  my_custom_network:
+    name: ${CONTAINER_NET_NAME}
+    driver: bridge
+    ipam:
+      config:
+        - subnet: ${CONTAINER_NET_SUBNET}
+
+volumes:
+  develop:
+  postgres_data:

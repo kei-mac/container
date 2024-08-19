@@ -1,0 +1,6 @@
+{
+    "redhat.telemetry.enabled": true,
+    "locale": "ja",
+    "workbench.preferredHighContrastLightColorTheme": "Visual Studio Dark",
+    "editor.formatOnSave": true
+}
